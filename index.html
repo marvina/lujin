@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>鲁锦·生成艺术系统 (Lujin Generative Art Studio)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+  <!-- 顶部导航栏 -->
+  <header class="h-14 border-b border-white/10 px-6 flex items-center justify-between glass-panel z-20 shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-600 to-amber-700 flex items-center justify-center shadow-lg shadow-amber-900/30 font-serif font-bold text-white text-base">
+        錦
+      </div>
+      <div>
+        <h1 class="text-base font-semibold tracking-wide text-neutral-100 flex items-center gap-2 font-serif">
+          鲁锦·生成艺术工作台
+          <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 font-sans font-normal">国家级非遗数字化</span>
+        </h1>
+      </div>
+    </div>
+
+    <!-- 顶部快捷操作 -->
+    <div class="flex items-center gap-3">
+      <button id="btnAudioToggle" class="btn-secondary text-xs" title="切换老木织机拟声音效">
+        <span>🔇 织机音效: 关</span>
+      </button>
+      <div class="h-4 w-[1px] bg-white/10"></div>
+      <button id="btnExportPNG" class="btn-secondary text-xs">
+        <span>📸 导出超清图</span>
+      </button>
+      <button id="btnExportSVG" class="btn-secondary text-xs">
+        <span>📐 导出SVG矢量</span>
+      </button>
+      <button id="btnExportJSON" class="btn-secondary text-xs">
+        <span>📦 织机配方</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 主体工作区 -->
+  <main class="flex-1 flex overflow-hidden">
+    
+    <!-- 左侧：多模态视口展示区 -->
+    <section class="flex-1 flex flex-col relative overflow-hidden bg-neutral-950">
+      
+      <!-- 视图模式切换 Tab -->
+      <div class="h-11 border-b border-white/10 px-5 flex items-center justify-between bg-neutral-900/80 backdrop-blur z-10 shrink-0">
+        <div class="flex items-center gap-1">
+          <button data-mode="fabric" class="view-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-amber-500/50 bg-amber-500/20 text-amber-300 transition-all">
+            🧵 织造实景 (Fabric View)
+          </button>
+          <button data-mode="draft" class="view-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-transparent text-neutral-400 hover:text-neutral-200 transition-all">
+            📐 综蹑组织图 (Draft Blueprint)
+          </button>
+          <button data-mode="mockup" class="view-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-transparent text-neutral-400 hover:text-neutral-200 transition-all">
+            🛋 实物文创展厅 (Mockup)
+          </button>
+          <button data-mode="ref" class="view-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-transparent text-neutral-400 hover:text-neutral-200 transition-all">
+            🖼 田野历史参考 (Museum Ref)
+          </button>
+        </div>
+
+        <!-- 画布缩放控制 -->
+        <div class="flex items-center gap-1.5">
+          <button id="btnZoomOut" class="w-7 h-7 rounded bg-white/5 hover:bg-white/10 text-neutral-300 flex items-center justify-center text-xs" title="缩小">-</button>
+          <button id="btnResetView" class="px-2 h-7 rounded bg-white/5 hover:bg-white/10 text-neutral-300 text-xs flex items-center justify-center" title="重置视口">100%</button>
+          <button id="btnZoomIn" class="w-7 h-7 rounded bg-white/5 hover:bg-white/10 text-neutral-300 flex items-center justify-center text-xs" title="放大">+</button>
+        </div>
+      </div>
+
+      <!-- 画布与多面板容器 -->
+      <div class="flex-1 relative overflow-hidden flex items-center justify-center">
+        
+        <!-- 1. 主渲染视口 (Fabric / Draft) -->
+        <div id="panelFabric" class="w-full h-full relative cursor-grab active:cursor-grabbing">
+          <canvas id="mainCanvas" class="w-full h-full block"></canvas>
+          <div class="absolute bottom-4 left-5 pointer-events-none text-xs text-neutral-400 bg-neutral-900/80 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur">
+            💡 提示：按住鼠标可平移画布，滚轮可缩放观察经纬线微观细节
+          </div>
+        </div>
+
+        <!-- 2. 实物应用展厅面板 (Mockup) -->
+        <div id="panelMockup" class="w-full h-full relative hidden flex-col">
+          <!-- 载体切换条 -->
+          <div class="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-neutral-900/90 p-1.5 rounded-xl border border-white/10 shadow-xl backdrop-blur">
+            <button data-type="pillow" class="mockup-type-btn px-3 py-1 rounded-lg text-xs bg-amber-600 text-white font-medium">中式方枕</button>
+            <button data-type="scroll" class="mockup-type-btn px-3 py-1 rounded-lg text-xs bg-neutral-800 text-neutral-300 font-medium">挂轴布卷</button>
+            <button data-type="runner" class="mockup-type-btn px-3 py-1 rounded-lg text-xs bg-neutral-800 text-neutral-300 font-medium">茶席桌旗</button>
+            <button data-type="tile" class="mockup-type-btn px-3 py-1 rounded-lg text-xs bg-neutral-800 text-neutral-300 font-medium">四方连续壁纸</button>
+          </div>
+          <canvas id="mockupCanvas" class="w-full h-full block"></canvas>
+        </div>
+
+        <!-- 3. 田野历史参考图面板 (Ref Gallery) -->
+        <div id="panelRef" class="w-full h-full p-8 overflow-y-auto hidden">
+          <div class="max-w-4xl mx-auto space-y-6">
+            <div>
+              <h2 class="text-lg font-serif font-bold text-amber-200">鲁西南民间织锦（鲁锦）历史实物调研</h2>
+              <p class="text-xs text-neutral-400 mt-1">对应工作空间 /案例/ref/鲁锦 历史实物档案，本生成系统正是基于这组经典的几何经纬织律抽象提炼而成。</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- 图 1 -->
+              <div class="ref-card glass-panel rounded-xl overflow-hidden border border-white/10">
+                <img src="ref/images (1).jpeg" alt="鲁锦经典布匹卷轴" class="w-full h-48 object-cover object-center bg-black/40">
+                <div class="p-4 space-y-2">
+                  <h3 class="text-sm font-semibold text-neutral-200 font-serif">图1: 多卷鲁锦经典提花样带</h3>
+                  <p class="text-xs text-neutral-400 leading-relaxed">
+                    展示了“菱形鱼眼纹”、“大合斗”、“九眼透”、“十样锦”等丰富图案。鲁锦通过经线起花技术，使几何花型在经纬交织中凸起，色彩对比鲜明。
+                  </p>
+                  <div class="text-[11px] text-amber-400/80 font-mono">对应系统算法：大合斗 / 鱼眼长流水 / 八棱灯笼花</div>
+                </div>
+              </div>
+
+              <!-- 图 2 -->
+              <div class="ref-card glass-panel rounded-xl overflow-hidden border border-white/10">
+                <img src="ref/images (2).jpeg" alt="鲁锦经纬微观交织" class="w-full h-48 object-cover object-center bg-black/40">
+                <div class="p-4 space-y-2">
+                  <h3 class="text-sm font-semibold text-neutral-200 font-serif">图2: 席纹挑花与微观经纬起花</h3>
+                  <p class="text-xs text-neutral-400 leading-relaxed">
+                    特写展示了纯棉织物的浮长组织（经浮长与纬浮长）。孔雀蓝与洋红交错时产生强烈的视错觉光学混色效应。
+                  </p>
+                  <div class="text-[11px] text-amber-400/80 font-mono">对应系统算法：百折五彩锦 / 席纹挑花物理光影</div>
+                </div>
+              </div>
+
+              <!-- 图 3 -->
+              <div class="ref-card glass-panel rounded-xl overflow-hidden border border-white/10">
+                <img src="ref/images (7).jpeg" alt="鲁锦折叠花布" class="w-full h-48 object-cover object-center bg-black/40">
+                <div class="p-4 space-y-2">
+                  <h3 class="text-sm font-semibold text-neutral-200 font-serif">图3: 百折红彩锦方格</h3>
+                  <p class="text-xs text-neutral-400 leading-relaxed">
+                    大格内嵌套小方格，边界辅以鲜黄、翠绿亮线。体现了鲁锦造型中“大格套小格、粗细相间”的严谨数理节律。
+                  </p>
+                  <div class="text-[11px] text-amber-400/80 font-mono">对应系统算法：百折条格锦 / 齐鲁华彩配色</div>
+                </div>
+              </div>
+
+              <!-- 图 4 -->
+              <div class="ref-card glass-panel rounded-xl overflow-hidden border border-white/10">
+                <img src="ref/images.jpeg" alt="传统木架陈列布卷" class="w-full h-48 object-cover object-center bg-black/40">
+                <div class="p-4 space-y-2">
+                  <h3 class="text-sm font-semibold text-neutral-200 font-serif">图4: 传统木架陈列鲁锦布匹</h3>
+                  <p class="text-xs text-neutral-400 leading-relaxed">
+                    青蓝配朱红的高对比度色相组合，水波流水长线横贯其中，经纬线紧密挺拔，体现了鲁西南民间手工木织机的非凡精度。
+                  </p>
+                  <div class="text-[11px] text-amber-400/80 font-mono">对应系统算法：五彩祥锦 / 挂轴实物模拟</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 右侧：生成参数与控制面板 (Sidebar) -->
+    <aside class="w-96 border-l border-white/10 glass-panel flex flex-col overflow-y-auto shrink-0 z-10">
+      
+      <!-- 快捷生成核心控制按钮区 -->
+      <div class="p-5 border-b border-white/10 space-y-3">
+        <div class="grid grid-cols-2 gap-2">
+          <button id="btnGenerate" class="btn-primary w-full py-2.5 text-sm">
+            <span>🎲 随机灵感生成</span>
+          </button>
+          <button id="btnMutate" class="btn-secondary w-full py-2.5 text-sm">
+            <span>✨ 算法微调变异</span>
+          </button>
+        </div>
+        <button id="btnAnimateWeave" class="w-full py-2.5 rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-300 font-medium text-xs hover:bg-amber-500/20 transition-all flex items-center justify-center gap-2">
+          <span>🧵 模拟飞梭织造</span>
+        </button>
+      </div>
+
+      <!-- 参数调节区 -->
+      <div class="p-5 space-y-5 flex-1">
+        
+        <!-- 1. 经典纹样母体 -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-neutral-300 flex items-center justify-between">
+            <span>经典纹样母体 (Pattern Motif)</span>
+            <span class="text-[10px] text-amber-400/80">非遗骨架</span>
+          </label>
+          <select id="patternSelect" class="custom-select">
+            <option value="da_he_dou" selected>大合斗与阶梯犬牙 (Nested Dou)</option>
+            <option value="yu_yan_chang_liu_shui">鱼眼长流水 (Fish Eye & Stream)</option>
+            <option value="ba_leng_deng_long">八棱灯笼花与十样锦 (Lantern Rosette)</option>
+            <option value="bai_zhe_wu_cai">百折五彩锦与席纹挑花 (Polychrome Huckaback)</option>
+            <option value="zi_dong_ji_jin">自涌现细胞织锦 (Wolfram Cellular)</option>
+          </select>
+        </div>
+
+        <!-- 2. 传统非遗色谱 -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-semibold text-neutral-300">传统非遗色谱 (Palette)</label>
+            <button id="btnShufflePalette" class="text-[11px] text-amber-400 hover:text-amber-300">洗牌次序</button>
+          </div>
+          <select id="paletteSelect" class="custom-select">
+            <option value="qilu" selected>齐鲁华彩 (经典朱红与金黄)</option>
+            <option value="qinghua">青花素韵 (蓝染与原棉本白)</option>
+            <option value="wucai">五彩祥锦 (孔雀蓝与丹砂七彩)</option>
+            <option value="caomu">草木山石 (熟褐、赭石与秋葵)</option>
+            <option value="xiandai">新中式新风 (霁蓝、石青与珊瑚)</option>
+            <option value="dianlan">深蓝靛影 (多重阶梯靛青)</option>
+          </select>
+          <!-- 实时色板色块展示 -->
+          <div id="paletteSwatches" class="flex items-center gap-1.5 pt-1"></div>
+        </div>
+
+        <!-- 3. 织律与经纬密度 -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-neutral-300">经纬密度 (Density)</label>
+            <select id="densitySelect" class="custom-select">
+              <option value="64">64 根 (粗纺大格)</option>
+              <option value="96">96 根 (中密土布)</option>
+              <option value="128" selected>128 根 (标准精纺)</option>
+              <option value="160">160 根 (高密提花)</option>
+              <option value="192">192 根 (极细双锦)</option>
+            </select>
+          </div>
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-neutral-300">纱线色带节律</label>
+            <select id="warpStyleSelect" class="custom-select">
+              <option value="symmetric_plaid" selected>对称回文律</option>
+              <option value="bicolor_check">经典双色条格</option>
+              <option value="solid">纯地长浮花</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 4. 随机种子 -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-neutral-300">算法发生器种子 (Seed)</label>
+          <input type="number" id="seedInput" class="custom-input font-mono text-xs" value="20261028">
+        </div>
+
+        <!-- 5. 非遗数理与文化释义卡片 -->
+        <div class="p-4 rounded-xl bg-white/[0.03] border border-white/10 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-300 font-serif" id="infoTitle">大合斗与阶梯犬牙</span>
+            <span class="text-[10px] text-neutral-400 font-mono" id="infoHeritageName">大合斗·九眼透</span>
+          </div>
+          <p id="infoMeaning" class="text-xs text-neutral-300 leading-relaxed">
+            源自古代量具“斗”，寓意日进斗金、五谷丰登。
+          </p>
+          <div id="infoTech" class="flex flex-wrap gap-1 pt-1"></div>
+          <div class="border-t border-white/10 pt-2 text-[11px] text-neutral-400 space-y-1">
+            <div class="flex justify-between">
+              <span>织造综框：</span>
+              <span id="infoShafts" class="text-neutral-200 font-mono">8综 多踏板木织机</span>
+            </div>
+            <div class="flex justify-between">
+              <span>经纬纱支：</span>
+              <span id="infoThreads" class="text-neutral-200 font-mono">经 128 根 × 纬 128 根</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 底部非遗学术签名 -->
+      <div class="p-4 border-t border-white/10 text-center text-[11px] text-neutral-500">
+        人文艺术学院 · 齐鲁非遗生成艺术工程 2026
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- 脚本引入 -->
+  <script src="js/palette.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/mockup.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

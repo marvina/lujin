@@ -1,0 +1,138 @@
+/**
+ * 鲁锦生成艺术系统视觉样式表 (Lujin Heritage Generative UI Theme)
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+:root {
+  --bg-primary: #0b0f17;
+  --bg-secondary: #131924;
+  --bg-card: rgba(23, 30, 44, 0.75);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-accent: rgba(212, 163, 89, 0.35);
+  --gold-primary: #d4a359;
+  --gold-hover: #e5b76b;
+  --text-main: #f0ede6;
+  --text-muted: #9ba3af;
+  --font-serif: 'Noto Serif SC', 'Songti SC', SimSun, serif;
+  --font-sans: 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(circle at 15% 15%, rgba(184, 134, 11, 0.07) 0%, transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(13, 71, 161, 0.08) 0%, transparent 45%);
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+/* 玻璃拟态面板 */
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+}
+
+/* 控件样式 */
+.custom-select, .custom-input {
+  background: rgba(11, 15, 23, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-main);
+  padding: 8px 12px;
+  border-radius: 8px;
+  outline: none;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.custom-select:focus, .custom-input:focus {
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 0 2px rgba(212, 163, 89, 0.2);
+}
+
+/* 按钮通用动效 */
+.btn-primary {
+  background: linear-gradient(135deg, #b8860b, #d4a359);
+  color: #111;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #c79213, #e5b76b);
+  box-shadow: 0 4px 14px rgba(212, 163, 89, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 163, 89, 0.4);
+}
+
+/* 纹样对比图卡片 */
+.ref-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ref-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+}
